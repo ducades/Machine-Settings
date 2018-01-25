@@ -13,11 +13,11 @@
 #include "UltiLCD2_menu_print.h"
 
 #define BED_CENTER_ADJUST_X (X_MAX_POS/2)
-#define BED_CENTER_ADJUST_Y (Y_MAX_LENGTH) //-10
-#define BED_LEFT_ADJUST_X 0 // 30
-#define BED_LEFT_ADJUST_Y 0 // 70
-#define BED_RIGHT_ADJUST_X (X_MAX_POS) // -60
-#define BED_RIGHT_ADJUST_Y 0 // 70
+#define BED_CENTER_ADJUST_Y (Y_MAX_LENGTH -10) //-10
+#define BED_LEFT_ADJUST_X 30 // 30
+#define BED_LEFT_ADJUST_Y 70 // 70
+#define BED_RIGHT_ADJUST_X (X_MAX_POS - 60) // -60
+#define BED_RIGHT_ADJUST_Y 70 // 70
 
 static void lcd_menu_first_run_init_2();
 static void lcd_menu_first_run_init_3();

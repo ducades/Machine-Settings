@@ -252,6 +252,22 @@ extern bool axis_relative_modes[];
 extern int feedmultiply;
 
 //AEther
+
+extern bool BRIM;
+extern bool FIRST;
+extern bool SUPPORT;
+extern bool ROOF;
+extern bool BOTTOM;
+extern bool OUTER;
+extern bool INNER;
+extern bool INFILL;
+extern bool TOP;
+extern bool FLOOR;
+extern bool TRAVEL;
+
+extern bool header;
+extern int type_index;
+
 //FEEDS
 extern float brim_feed_d;
 extern float brim_feed_n;

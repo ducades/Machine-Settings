@@ -14,7 +14,7 @@
 #include "ConfigurationStore.h"
 #include "TweakMenu.h"
 
-#define HEATUP_POSITION_COMMAND "G1 F1200 X5 Y10"
+#define HEATUP_POSITION_COMMAND "G1 F3000 X5 Y10"
 
 uint8_t lcd_cache[LCD_CACHE_SIZE];
 #define LCD_CACHE_NR_OF_FILES() lcd_cache[(LCD_CACHE_COUNT*(LONG_FILENAME_LENGTH+2))]
@@ -455,12 +455,25 @@ void lcd_menu_print_select()
                             retract_length = material[e].retraction_length[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
                         }
 
-                        enquecommand_P(PSTR("G28"));
-                        enquecommand_P(PSTR(HEATUP_POSITION_COMMAND)); 
-                        
+
                         //AEther
-                        lcd_lib_clear();
-                        lcd_change_to_menu(quality_menu, 0);
+                        if (strcmp_P(buffer, PSTR(";Quality Setting:")) != 0)
+                        {
+                            card.fgets(buffer, sizeof(buffer));
+                            buffer[sizeof(buffer)-1] = '\0';
+                            while (strlen(buffer) > 0 && buffer[strlen(buffer)-1] < ' ') buffer[strlen(buffer)-1] = '\0';
+                        }
+                        if (strcmp_P(buffer, PSTR(";Quality Setting:")) == 0)
+                        {
+                            lcd_lib_clear();
+                            lcd_change_to_menu(lcd_menu_header_select, 0);
+                        }
+                        else
+                        {
+                            lcd_lib_clear();                            
+                            lcd_change_to_menu(lcd_menu_header_select, 0); //lcd_change_to_menu(quality_menu, 0);
+                        }
+
 
                         if (strcasecmp(material[0].name, LCD_DETAIL_CACHE_MATERIAL_TYPE(0)) != 0)
                         {
@@ -595,6 +608,55 @@ static void lcd_menu_print_printing()
         switch(printing_state)
         {
         default:
+            switch(type_index)
+            {
+                case 1:
+                    lcd_lib_draw_string_center(10, "BRIM");
+                    break;
+                case 2:
+                    lcd_lib_draw_string_center(10, "FIRST LAYER");
+                    break;
+                case 3:
+                    lcd_lib_draw_string_center(10, "SUPPORT");
+                    break;
+                case 4:
+                    lcd_lib_draw_string_center(10, "INTERFACE ROOF");
+                    break;
+                case 5:
+                    lcd_lib_draw_string_center(10, "BOTTOM");
+                    break;
+                case 6:
+                    lcd_lib_draw_string_center(10, "OUTER WALL");
+                    break;
+                case 7:
+                    lcd_lib_draw_string_center(10, "INNER WALL");
+                    break;
+                case 8:
+                    lcd_lib_draw_string_center(10, "INFILL");
+                    break;
+                case 9:
+                    lcd_lib_draw_string_center(10, "TOP");
+                    break;
+                case 10:
+                    lcd_lib_draw_string_center(10, "INTERFACE FLOOR");
+                    break;
+                case 11:
+                    lcd_lib_draw_string_center(10, "TRAVEL");
+                    break;
+            }
+            LED_NORMAL();
+            if (print_quality == 0)
+            {
+                lcd_lib_draw_string_centerP(0, PSTR("Draft"));
+            }
+            else if (print_quality == 1)
+            { 
+                lcd_lib_draw_string_centerP(0, PSTR("Normal"));
+            }
+            else if (print_quality == 2)
+            {
+                lcd_lib_draw_string_centerP(0, PSTR("Best"));
+            }
             lcd_lib_draw_string_centerP(20, PSTR("Printing:"));
             lcd_lib_draw_string_center(30, LCD_CACHE_FILENAME(0));
             break;
@@ -613,6 +675,7 @@ static void lcd_menu_print_printing()
             lcd_lib_draw_string_center(30, buffer);
             break;
         }
+    
         float printTimeMs = (millis() - starttime);
         float printTimeSec = printTimeMs / 1000L;
         float totalTimeMs = float(printTimeMs) * float(card.getFileSize()) / float(card.getFilePos());
@@ -624,7 +687,7 @@ static void lcd_menu_print_printing()
         if (LCD_DETAIL_CACHE_TIME() == 0 && printTimeSec < 60)
         {
             totalTimeSmoothSec = totalTimeMs / 1000;
-            lcd_lib_draw_stringP(5, 10, PSTR("Time left unknown"));
+            //lcd_lib_draw_stringP(5, 10, PSTR("Time left unknown"));
         }else{
             unsigned long totalTimeSec;
             if (printTimeSec < LCD_DETAIL_CACHE_TIME() / 2)
@@ -641,9 +704,9 @@ static void lcd_menu_print_printing()
                 timeLeftSec = 1;
             else
                 timeLeftSec = totalTimeSec - printTimeSec;
-            int_to_time_string(timeLeftSec, buffer);
-            lcd_lib_draw_stringP(5, 10, PSTR("Time left"));
-            lcd_lib_draw_string(65, 10, buffer);
+            //int_to_time_string(timeLeftSec, buffer);
+            //lcd_lib_draw_stringP(5, 10, PSTR("Time left"));
+            //lcd_lib_draw_string(65, 10, buffer);
         }
 
         lcd_progressbar(progress);
@@ -787,7 +850,7 @@ static char* tune_item_callback(uint8_t nr)
     else if (nr == 2)
         strcpy_P(c, PSTR("Speed"));
     else if (nr == 3)
-        strcpy_P(c, PSTR("Feedrates"));
+        strcpy_P(c, PSTR("Type Settings"));
     else if (nr == 4)
         strcpy_P(c, PSTR("Temperature"));
 #if EXTRUDERS > 1
@@ -911,10 +974,23 @@ void lcd_menu_print_tune_heatup_nozzle1()
 static void lcd_menu_print_tune()
 {
     lcd_scroll_menu(PSTR("TUNE"), 7 + BED_MENU_OFFSET + EXTRUDERS * 2, tune_item_callback, tune_item_details_callback);
+    if (print_quality == 0)
+    {
+        LED_QUALITY_DRAFT();
+    }
+    else if (print_quality == 1)
+    { 
+        LED_QUALITY_NORMAL();
+    }
+    else if (print_quality == 2)
+    {
+        LED_QUALITY_BEST();
+    }
     if (lcd_lib_button_pressed)
     {
         tune_type = false;
 
+        
         if (IS_SELECTED_SCROLL(0))
         {
             if (card.sdprinting)

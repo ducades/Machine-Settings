@@ -324,8 +324,8 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define DISABLE_Z false
 #define DISABLE_E false // For all extruders
 
-#define INVERT_X_DIR true    // for Mendel set to false, for Orca set to true
-#define INVERT_Y_DIR false    // for Mendel set to true, for Orca set to false
+#define INVERT_X_DIR false    // for Mendel set to false, for Orca set to true
+#define INVERT_Y_DIR true    // for Mendel set to true, for Orca set to false
 #define INVERT_Z_DIR true     // for Mendel set to false, for Orca set to true
 #define INVERT_E0_DIR true    // for direct drive extruder v9 set to true, for geared extruder set to false
 #define INVERT_E1_DIR false   // for direct drive extruder v9 set to true, for geared extruder set to false
@@ -340,11 +340,11 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 #define min_software_endstops true // If true, axis won't move to coordinates less than HOME_POS.
 #define max_software_endstops true  // If true, axis won't move to coordinates greater than the defined lengths below.
 // Travel limits after homing
-#define X_MAX_POS 200 // 287
+#define X_MAX_POS 287 // 287
 #define X_MIN_POS 0
-#define Y_MAX_POS 200 // 259
+#define Y_MAX_POS 259 // 259
 #define Y_MIN_POS 0
-#define Z_MAX_POS 200 // 220
+#define Z_MAX_POS 220 // 220
 #define Z_MIN_POS 0
 
 #define X_MAX_LENGTH (X_MAX_POS - X_MIN_POS)
@@ -368,7 +368,7 @@ const bool Z_ENDSTOPS_INVERTING = true; // set to true to invert the logic of th
 
 // default settings
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {80.0,80.0,200,200}  // 400, 4012 default Esteps per unit for AEther
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {80.0,80.0,400,4012}  // 400, 4012 default Esteps per unit for AEther
 #define DEFAULT_MAX_FEEDRATE          {300, 300, 40, 40}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {2000,2000,100,800}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 
