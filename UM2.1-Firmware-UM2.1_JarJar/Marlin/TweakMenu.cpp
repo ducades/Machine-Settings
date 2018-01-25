@@ -14,6 +14,7 @@
 #include "UltiLCD2_hi_lib.h"
 #include "UltiLCD2_menu_print.h"
 
+
 void lcd_advanced_type();
 void lcd_advanced_type_tune();
 void brim_menu();
@@ -28,6 +29,46 @@ void top_menu();
 void interface_bot_menu();
 void travel_menu();
 void quality_menu();
+void lcd_menu_header_select();
+void set_header_true();
+void set_header_false();
+
+void set_brim_true();
+void set_brim_false();
+void set_first_true();
+void set_first_false();
+void set_support_true();
+void set_support_false();
+void set_roof_true();
+void set_roof_false();
+void set_bottom_true();
+void set_bottom_false();
+void set_outer_true();
+void set_outer_false();
+void set_inner_true();
+void set_inner_false();
+void set_infill_true();
+void set_infill_false();
+void set_top_true();
+void set_top_false();
+void set_floor_true();
+void set_floor_false();
+void set_travel_true();
+void set_travel_false();
+
+void use_brim();
+void use_first();
+void use_support();
+void use_roof();
+void use_bottom();
+void use_outer();
+void use_inner();
+void use_infill();
+void use_top();
+void use_floor();
+void use_travel();
+
+
 
 bool tune_type = false;
 
@@ -177,10 +218,12 @@ static char* lcd_brim_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -192,7 +235,14 @@ static void lcd_brim_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+    else if (nr == 1)
+    {
+        if (BRIM == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(brim_feed_d, buffer, PSTR("mm/sec"));
@@ -201,7 +251,7 @@ static void lcd_brim_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(brim_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(brim_flow_d, buffer, PSTR("%"));
@@ -211,7 +261,7 @@ static void lcd_brim_details(uint8_t nr)
             int_to_string(brim_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(brim_fan_d, buffer, PSTR("%"));
@@ -226,7 +276,7 @@ static void lcd_brim_details(uint8_t nr)
 
 static void brim_menu()
 {
-    lcd_scroll_menu(PSTR("Skirt/Brim Settings"), 4, lcd_brim_item, lcd_brim_details);
+    lcd_scroll_menu(PSTR("Skirt/Brim Settings"), 5, lcd_brim_item, lcd_brim_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -244,6 +294,10 @@ static void brim_menu()
         }
         else if (IS_SELECTED_SCROLL(1))
         {
+            lcd_change_to_menu(use_brim, 0);
+        }
+        else if (IS_SELECTED_SCROLL(2))
+        {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(brim_feed_d, "Skirt/Brim Feed", "mm/sec", 0, 20000);
             else if (print_quality == PRINT_QUALITY_NORMAL)
@@ -251,7 +305,7 @@ static void brim_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(brim_feed_b, "Skirt/Brim Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(brim_flow_d, "Skirt/Brim Flowrate", "%", 0, 200);
@@ -260,7 +314,7 @@ static void brim_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(brim_flow_b, "Skirt/Brim Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(brim_fan_d, "Skirt/Brim Fanspeed", "%", 0, 100);
@@ -279,10 +333,12 @@ static char* lcd_first_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -294,7 +350,15 @@ static void lcd_first_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+
+    else if (nr == 1)
+    {
+        if (FIRST == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(first_feed_d, buffer, PSTR("mm/sec"));
@@ -303,7 +367,7 @@ static void lcd_first_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(first_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(first_flow_d, buffer, PSTR("%"));
@@ -313,7 +377,7 @@ static void lcd_first_details(uint8_t nr)
             int_to_string(first_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(first_fan_d, buffer, PSTR("%"));
@@ -328,7 +392,7 @@ static void lcd_first_details(uint8_t nr)
 
 static void first_menu()
 {
-    lcd_scroll_menu(PSTR("First Layer Settings"), 4, lcd_first_item, lcd_first_details);
+    lcd_scroll_menu(PSTR("First Layer Settings"), 5, lcd_first_item, lcd_first_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -346,6 +410,10 @@ static void first_menu()
         }
         else if (IS_SELECTED_SCROLL(1))
         {
+            lcd_change_to_menu(use_first, 0);
+        }
+        else if (IS_SELECTED_SCROLL(2))
+        {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(first_feed_d, "First Layer Feed", "mm/sec", 0, 20000);
             else if (print_quality == PRINT_QUALITY_NORMAL)
@@ -353,7 +421,7 @@ static void first_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(first_feed_b, "First Layer Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(first_flow_d, "First Layer Flowrate", "%", 0, 200);
@@ -362,7 +430,7 @@ static void first_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(first_flow_b, "First Layer Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(first_fan_d, "First Layer Fanspeed", "%", 0, 100);
@@ -382,10 +450,12 @@ static char* lcd_support_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -397,7 +467,16 @@ static void lcd_support_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+   
+    else if (nr == 1)
+    {
+        if (SUPPORT == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(support_feed_d, buffer, PSTR("mm/sec"));
@@ -406,7 +485,7 @@ static void lcd_support_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(support_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(support_flow_d, buffer, PSTR("%"));
@@ -416,7 +495,7 @@ static void lcd_support_details(uint8_t nr)
             int_to_string(support_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(support_fan_d, buffer, PSTR("%"));
@@ -431,7 +510,7 @@ static void lcd_support_details(uint8_t nr)
 
 static void support_menu()
 {
-    lcd_scroll_menu(PSTR("Support Settings"), 4, lcd_support_item, lcd_support_details);
+    lcd_scroll_menu(PSTR("Support Settings"), 5, lcd_support_item, lcd_support_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -447,7 +526,13 @@ static void support_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_support, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(support_feed_d, "Support Feed", "mm/sec", 0, 20000);
@@ -456,7 +541,7 @@ static void support_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(support_feed_b, "Support Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(support_flow_d, "Support Flowrate", "%", 0, 200);
@@ -465,7 +550,7 @@ static void support_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(support_flow_b, "Support Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(support_fan_d, "Support Fanspeed", "%", 0, 100);
@@ -485,10 +570,12 @@ static char* lcd_interface_top_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -500,7 +587,16 @@ static void lcd_interface_top_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+    
+    else if (nr == 1)
+    {
+        if (ROOF == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+    
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(interfacetop_feed_d, buffer, PSTR("mm/sec"));
@@ -509,7 +605,7 @@ static void lcd_interface_top_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(interfacetop_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(interfacetop_flow_d, buffer, PSTR("%"));
@@ -519,7 +615,7 @@ static void lcd_interface_top_details(uint8_t nr)
             int_to_string(interfacetop_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(interfacetop_fan_d, buffer, PSTR("%"));
@@ -534,7 +630,7 @@ static void lcd_interface_top_details(uint8_t nr)
 
 static void interface_top_menu()
 {
-    lcd_scroll_menu(PSTR("Interface Roof"), 4, lcd_interface_top_item, lcd_interface_top_details);
+    lcd_scroll_menu(PSTR("Interface Roof"), 5, lcd_interface_top_item, lcd_interface_top_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -550,7 +646,13 @@ static void interface_top_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_roof, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(interfacetop_feed_d, "Interface Roof Feed", "mm/sec", 0, 20000);
@@ -559,7 +661,7 @@ static void interface_top_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(interfacetop_feed_b, "Interface Roof Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(interfacetop_flow_d, "Interface Roof Flowrate", "%", 0, 200);
@@ -568,7 +670,7 @@ static void interface_top_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(interfacetop_flow_b, "Interface Roof Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(interfacetop_fan_d, "Interface Roof Fanspeed", "%", 0, 100);
@@ -588,10 +690,12 @@ static char* lcd_bottom_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -603,7 +707,16 @@ static void lcd_bottom_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+   
+    else if (nr == 1)
+    {
+        if (BOTTOM == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(bottom_feed_d, buffer, PSTR("mm/sec"));
@@ -612,7 +725,7 @@ static void lcd_bottom_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(bottom_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(bottom_flow_d, buffer, PSTR("%"));
@@ -622,7 +735,7 @@ static void lcd_bottom_details(uint8_t nr)
             int_to_string(bottom_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(bottom_fan_d, buffer, PSTR("%"));
@@ -637,7 +750,7 @@ static void lcd_bottom_details(uint8_t nr)
 
 static void bottom_menu()
 {
-    lcd_scroll_menu(PSTR("Bottom Settings"), 4, lcd_bottom_item, lcd_bottom_details);
+    lcd_scroll_menu(PSTR("Bottom Settings"), 5, lcd_bottom_item, lcd_bottom_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -653,7 +766,13 @@ static void bottom_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_bottom, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(bottom_feed_d, "Bottom Feed", "mm/sec", 0, 20000);
@@ -662,7 +781,7 @@ static void bottom_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(bottom_feed_b, "Bottom Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(bottom_flow_d, "Bottom Flowrate", "%", 0, 200);
@@ -671,7 +790,7 @@ static void bottom_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(bottom_flow_b, "Bottom Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(bottom_fan_d, "Bottom Fanspeed", "%", 0, 100);
@@ -691,10 +810,12 @@ static char* lcd_outer_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -706,7 +827,16 @@ static void lcd_outer_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+    
+    else if (nr == 1)
+    {
+        if (OUTER == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(outer_feed_d, buffer, PSTR("mm/sec"));
@@ -715,7 +845,7 @@ static void lcd_outer_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(outer_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(outer_flow_d, buffer, PSTR("%"));
@@ -725,7 +855,7 @@ static void lcd_outer_details(uint8_t nr)
             int_to_string(outer_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(outer_fan_d, buffer, PSTR("%"));
@@ -740,7 +870,7 @@ static void lcd_outer_details(uint8_t nr)
 
 static void outer_wall_menu()
 {
-    lcd_scroll_menu(PSTR("Outer Settings"), 4, lcd_outer_item, lcd_outer_details);
+    lcd_scroll_menu(PSTR("Outer Settings"), 5, lcd_outer_item, lcd_outer_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -756,7 +886,13 @@ static void outer_wall_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_outer, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(outer_feed_d, "Outer Wall Feed", "mm/sec", 0, 20000);
@@ -765,7 +901,7 @@ static void outer_wall_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(outer_feed_b, "Outer Wall Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(outer_flow_d, "Outer Wall Flowrate", "%", 0, 200);
@@ -774,7 +910,7 @@ static void outer_wall_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(outer_flow_b, "Outer Wall Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(outer_fan_d, "Outer Wall Fanspeed", "%", 0, 100);
@@ -793,10 +929,12 @@ static char* lcd_inner_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -808,7 +946,16 @@ static void lcd_inner_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+
+    else if (nr == 1)
+    {
+        if (INNER == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(inner_feed_d, buffer, PSTR("mm/sec"));
@@ -817,7 +964,7 @@ static void lcd_inner_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(inner_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(inner_flow_d, buffer, PSTR("%"));
@@ -827,7 +974,7 @@ static void lcd_inner_details(uint8_t nr)
             int_to_string(inner_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(inner_fan_d, buffer, PSTR("%"));
@@ -842,7 +989,7 @@ static void lcd_inner_details(uint8_t nr)
 
 static void inner_wall_menu()
 {
-    lcd_scroll_menu(PSTR("Inner Settings"), 4, lcd_inner_item, lcd_inner_details);
+    lcd_scroll_menu(PSTR("Inner Settings"), 5, lcd_inner_item, lcd_inner_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -858,7 +1005,13 @@ static void inner_wall_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_inner, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(inner_feed_d, "Inner Wall Feed", "mm/sec", 0, 20000);
@@ -867,7 +1020,7 @@ static void inner_wall_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(inner_feed_b, "Inner Wall Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(inner_flow_d, "Inner Wall Flowrate", "%", 0, 200);
@@ -876,7 +1029,7 @@ static void inner_wall_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(inner_flow_b, "Inner Wall Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(inner_fan_d, "Inner Wall Fanspeed", "%", 0, 100);
@@ -896,10 +1049,12 @@ static char* lcd_infill_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -911,7 +1066,16 @@ static void lcd_infill_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+
+    else if (nr == 1)
+    {
+        if (INFILL == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(infill_feed_d, buffer, PSTR("mm/sec"));
@@ -920,7 +1084,7 @@ static void lcd_infill_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(infill_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(infill_flow_d, buffer, PSTR("%"));
@@ -930,7 +1094,7 @@ static void lcd_infill_details(uint8_t nr)
             int_to_string(infill_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(infill_fan_d, buffer, PSTR("%"));
@@ -945,7 +1109,7 @@ static void lcd_infill_details(uint8_t nr)
 
 static void infill_menu()
 {
-    lcd_scroll_menu(PSTR("Infill Settings"), 4, lcd_infill_item, lcd_infill_details);
+    lcd_scroll_menu(PSTR("Infill Settings"), 5, lcd_infill_item, lcd_infill_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -961,7 +1125,13 @@ static void infill_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_infill, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(infill_feed_d, "Infill Feed", "mm/sec", 0, 20000);
@@ -970,7 +1140,7 @@ static void infill_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(infill_feed_b, "Infill Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(infill_flow_d, "Infill Flowrate", "%", 0, 200);
@@ -979,7 +1149,7 @@ static void infill_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(infill_flow_b, "Infill Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(infill_fan_d, "Infill Fanspeed", "%", 0, 100);
@@ -997,10 +1167,12 @@ static char* lcd_top_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -1012,7 +1184,16 @@ static void lcd_top_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+
+    else if (nr == 1)
+    {
+        if (TOP == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(top_feed_d, buffer, PSTR("mm/sec"));
@@ -1021,7 +1202,7 @@ static void lcd_top_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(top_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(top_flow_d, buffer, PSTR("%"));
@@ -1031,7 +1212,7 @@ static void lcd_top_details(uint8_t nr)
             int_to_string(top_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(top_fan_d, buffer, PSTR("%"));
@@ -1046,7 +1227,7 @@ static void lcd_top_details(uint8_t nr)
 
 static void top_menu()
 {
-    lcd_scroll_menu(PSTR("Top Settings"), 4, lcd_top_item, lcd_top_details);
+    lcd_scroll_menu(PSTR("Top Settings"), 5, lcd_top_item, lcd_top_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -1062,7 +1243,13 @@ static void top_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_top, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(top_feed_d, "Top Feed", "mm/sec", 0, 20000);
@@ -1071,7 +1258,7 @@ static void top_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(top_feed_b, "Top Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(top_flow_d, "Top Flowrate", "%", 0, 200);
@@ -1080,7 +1267,7 @@ static void top_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(top_flow_b, "Top Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(top_fan_d, "Top Fanspeed", "%", 0, 100);
@@ -1099,10 +1286,12 @@ static char* lcd_interfacebot_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -1114,7 +1303,16 @@ static void lcd_interfacebot_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+    
+    else if (nr == 1)
+    {
+        if (FLOOR == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(interfacebot_feed_d, buffer, PSTR("mm/sec"));
@@ -1123,7 +1321,7 @@ static void lcd_interfacebot_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(interfacebot_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(interfacebot_flow_d, buffer, PSTR("%"));
@@ -1133,7 +1331,7 @@ static void lcd_interfacebot_details(uint8_t nr)
             int_to_string(interfacebot_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(interfacebot_fan_d, buffer, PSTR("%"));
@@ -1148,7 +1346,7 @@ static void lcd_interfacebot_details(uint8_t nr)
 
 static void interface_bot_menu()
 {
-    lcd_scroll_menu(PSTR("Interface Floor"), 4, lcd_interfacebot_item, lcd_interfacebot_details);
+    lcd_scroll_menu(PSTR("Interface Floor"), 5, lcd_interfacebot_item, lcd_interfacebot_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -1164,7 +1362,13 @@ static void interface_bot_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_floor, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(interfacebot_feed_d, "Interface Floor Feed", "mm/sec", 0, 20000);
@@ -1173,7 +1377,7 @@ static void interface_bot_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(interfacebot_feed_b, "Interface Floor Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(interfacebot_flow_d, "Interface Floor Flowrate", "%", 0, 200);
@@ -1182,7 +1386,7 @@ static void interface_bot_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(interfacebot_flow_b, "Interface Floor Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(interfacebot_fan_d, "Interface Floor Fanspeed", "%", 0, 100);
@@ -1201,10 +1405,12 @@ static char* lcd_travel_item(uint8_t nr)
     if (nr == 0)
         strcpy_P(card.longFilename, PSTR("< RETURN"));
     else if (nr == 1)
-        strcpy_P(card.longFilename, PSTR("Feed"));
+        strcpy_P(card.longFilename, PSTR("Used?"));
     else if (nr == 2)
-        strcpy_P(card.longFilename, PSTR("Flow"));
+        strcpy_P(card.longFilename, PSTR("Feed"));
     else if (nr == 3)
+        strcpy_P(card.longFilename, PSTR("Flow"));
+    else if (nr == 4)
         strcpy_P(card.longFilename, PSTR("Fan"));
     else
         strcpy_P(card.longFilename, PSTR("???"));
@@ -1216,7 +1422,16 @@ static void lcd_travel_details(uint8_t nr)
     char buffer[16];
     if (nr == 0)
         return;
-    else if(nr == 1)
+
+    else if (nr == 1)
+    {
+        if (TRAVEL == true)
+            int_to_string(NULL, NULL, PSTR("Yes"));
+        else
+            int_to_string(NULL, NULL, PSTR("No"));
+    }
+
+    else if(nr == 2)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(travel_feed_d, buffer, PSTR("mm/sec"));
@@ -1225,7 +1440,7 @@ static void lcd_travel_details(uint8_t nr)
         else if (print_quality == PRINT_QUALITY_BEST)
             int_to_string(travel_feed_b, buffer, PSTR("mm/sec"));
     }
-    else if(nr == 2)
+    else if(nr == 3)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(travel_flow_d, buffer, PSTR("%"));
@@ -1235,7 +1450,7 @@ static void lcd_travel_details(uint8_t nr)
             int_to_string(travel_flow_b, buffer, PSTR("%"));
     }
 
-    else if(nr == 3)
+    else if(nr == 4)
     {
         if (print_quality == PRINT_QUALITY_DRAFT)
             int_to_string(travel_fan_d, buffer, PSTR("%"));
@@ -1250,7 +1465,7 @@ static void lcd_travel_details(uint8_t nr)
 
 static void travel_menu()
 {
-    lcd_scroll_menu(PSTR("Travel Settings"), 4, lcd_travel_item, lcd_travel_details);
+    lcd_scroll_menu(PSTR("Travel Settings"), 5, lcd_travel_item, lcd_travel_details);
     if (lcd_lib_button_pressed)
     {
         if (IS_SELECTED_SCROLL(0))
@@ -1266,7 +1481,13 @@ static void travel_menu()
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
         }
+
         else if (IS_SELECTED_SCROLL(1))
+        {
+            lcd_change_to_menu(use_travel, 0);
+        }
+
+        else if (IS_SELECTED_SCROLL(2))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING_FLOAT1(travel_feed_d, "Travel Feed", "mm/sec", 0, 20000);
@@ -1275,7 +1496,7 @@ static void travel_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING_FLOAT1(travel_feed_b, "Travel Feed", "mm/sec", 0, 20000);
         }
-        else if (IS_SELECTED_SCROLL(2))
+        else if (IS_SELECTED_SCROLL(3))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(travel_flow_d, "Travel Flowrate", "%", 0, 200);
@@ -1284,7 +1505,7 @@ static void travel_menu()
             else if (print_quality == PRINT_QUALITY_BEST)
                 LCD_EDIT_SETTING(travel_flow_b, "Travel Flowrate", "%", 0, 200);
         }
-        else if (IS_SELECTED_SCROLL(3))
+        else if (IS_SELECTED_SCROLL(4))
         {
             if (print_quality == PRINT_QUALITY_DRAFT)
                 LCD_EDIT_SETTING(travel_fan_d, "Travel Fanspeed", "%", 0, 100);
@@ -1338,13 +1559,11 @@ static void quality_menu()
         {
             if (tune_type == false)
             {
-                Config_StoreSettings();
                 lcd_lib_beep();
                 lcd_change_to_menu(previousMenu, 0);
             }
             else
             {
-                Config_StoreSettings();
                 lcd_lib_beep();
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
@@ -1352,26 +1571,234 @@ static void quality_menu()
         else if (IS_SELECTED_SCROLL(1))
         {
             print_quality = PRINT_QUALITY_DRAFT;
-            Config_StoreSettings();
             lcd_lib_beep();
-            lcd_change_to_menu(lcd_menu_print_printing);
+            lcd_change_to_menu(lcd_menu_print_heatup);
         }
 
         else if (IS_SELECTED_SCROLL(2))
         {
             print_quality = PRINT_QUALITY_NORMAL;
-            Config_StoreSettings();
             lcd_lib_beep();
-            lcd_change_to_menu(lcd_menu_print_printing);
+            lcd_change_to_menu(lcd_menu_print_heatup);
         }
 
         else if (IS_SELECTED_SCROLL(3))        
         {
             print_quality = PRINT_QUALITY_BEST;
-            Config_StoreSettings();
             lcd_lib_beep();
-            lcd_change_to_menu(lcd_menu_print_printing);
+            lcd_change_to_menu(lcd_menu_print_heatup);
         }
     }
 
+}
+
+static void lcd_menu_header_select()
+{
+    LED_GLOW();
+    lcd_question_screen(quality_menu, set_header_true, PSTR("YES"), quality_menu, set_header_false, PSTR("NO"));
+
+    lcd_lib_draw_string_centerP(20, PSTR("Use header?"));
+
+    lcd_lib_update_screen();
+}
+
+static void set_header_true()
+{
+    header = true;                            
+    enquecommand_P(PSTR("G28"));
+    enquecommand_P(PSTR("G1 F3000 X5 Y10")); 
+}
+
+
+static void set_header_false()
+{
+    header = false;
+    enquecommand_P(PSTR("G28"));
+    enquecommand_P(PSTR("G1 F3000 X5 Y10")); 
+}
+
+static void set_brim_false()
+{
+    BRIM = false;
+}
+
+static void set_brim_true()
+{
+    BRIM = true; 
+}
+
+static void set_first_false()
+{
+    FIRST = false;
+}
+
+static void set_first_true()
+{
+    FIRST = true; 
+}
+
+static void set_support_false()
+{
+    SUPPORT = false;
+}
+
+static void set_support_true()
+{
+    SUPPORT = true; 
+}
+
+static void set_roof_false()
+{
+    ROOF = false;
+}
+
+static void set_roof_true()
+{
+    ROOF = true; 
+}
+
+static void set_bottom_false()
+{
+    BOTTOM = false;
+}
+
+static void set_bottom_true()
+{
+    BOTTOM = true; 
+}
+
+static void set_outer_false()
+{
+    OUTER = false;
+}
+
+static void set_outer_true()
+{
+    OUTER = true; 
+}
+
+static void set_inner_false()
+{
+    INNER = false;
+}
+
+static void set_inner_true()
+{
+    INNER = true; 
+}
+
+static void set_infill_false()
+{
+    INFILL = false;
+}
+
+static void set_infill_true()
+{
+    INFILL = true; 
+}
+
+static void set_top_false()
+{
+    TOP = false;
+}
+
+static void set_top_true()
+{
+    TOP = true; 
+}
+
+static void set_floor_false()
+{
+    FLOOR = false;
+}
+
+static void set_floor_true()
+{
+    FLOOR = true; 
+}
+static void set_travel_false()
+{
+    TRAVEL = false;
+}
+
+static void set_travel_true()
+{
+    TRAVEL = true; 
+}
+
+static void use_brim()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_brim_true, PSTR("YES"), lcd_advanced_type_tune, set_brim_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Brim?"));
+    lcd_lib_update_screen();
+}
+
+static void use_first()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_first_true, PSTR("YES"), lcd_advanced_type_tune, set_first_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use First?"));
+    lcd_lib_update_screen();
+}
+
+static void use_support()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_support_true, PSTR("YES"), lcd_advanced_type_tune, set_support_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Support?"));
+    lcd_lib_update_screen();
+}
+
+static void use_roof()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_roof_true, PSTR("YES"), lcd_advanced_type_tune, set_roof_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Roof?"));
+    lcd_lib_update_screen();
+}
+
+static void use_bottom()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_bottom_true, PSTR("YES"), lcd_advanced_type_tune, set_bottom_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Bottom?"));
+    lcd_lib_update_screen();
+}
+
+static void use_outer()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_outer_true, PSTR("YES"), lcd_advanced_type_tune, set_outer_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Outer?"));
+    lcd_lib_update_screen();
+}
+
+static void use_inner()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_inner_true, PSTR("YES"), lcd_advanced_type_tune, set_inner_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Inner?"));
+    lcd_lib_update_screen();
+}
+
+static void use_infill()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_infill_true, PSTR("YES"), lcd_advanced_type_tune, set_infill_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Infill?"));
+    lcd_lib_update_screen();
+}
+
+static void use_top()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_top_true, PSTR("YES"), lcd_advanced_type_tune, set_top_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Top?"));
+    lcd_lib_update_screen();
+}
+
+static void use_floor()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_floor_true, PSTR("YES"), lcd_advanced_type_tune, set_floor_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Floor?"));
+    lcd_lib_update_screen();
+}
+
+static void use_travel()
+{
+    lcd_question_screen(lcd_advanced_type_tune, set_travel_true, PSTR("YES"), lcd_advanced_type_tune, set_travel_false, PSTR("NO"));
+    lcd_lib_draw_string_centerP(20, PSTR("Use Travel?"));
+    lcd_lib_update_screen();
 }

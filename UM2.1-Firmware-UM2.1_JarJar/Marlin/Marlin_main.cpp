@@ -157,6 +157,7 @@
 //===========================================================================
 
 
+
 //===========================================================================
 //=============================public variables=============================
 //===========================================================================
@@ -168,6 +169,21 @@ bool axis_relative_modes[] = AXIS_RELATIVE_MODES;
 int feedmultiply=100; //100->1 200->2
 
 //AEther
+
+bool BRIM = true;
+bool FIRST = true;
+bool SUPPORT = true;
+bool ROOF = true;
+bool BOTTOM = true;
+bool OUTER = true;
+bool INNER = true;
+bool INFILL = true;
+bool TOP = true;
+bool FLOOR = true;
+bool TRAVEL = true;
+
+bool header = false;
+int type_index = 0;
 
 //FEEDS
 float brim_feed_d = 600;
@@ -405,6 +421,7 @@ unsigned long starttime=0;
 unsigned long stoptime=0;
 
 static uint8_t tmp_extruder;
+
 
 
 uint8_t Stopped = false;
@@ -781,8 +798,9 @@ void get_command()
             break;
           }
 
-        }
-#ifdef ENABLE_ULTILCD2
+        } 
+
+#ifdef ENABLE_ULTILCD2 
         strchr_pointer = strchr(cmdbuffer[bufindw], 'M');
         if (strtol(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL, 10) != 105)
             lastSerialCommandTime = millis();
@@ -794,6 +812,7 @@ void get_command()
     }
     else
     {
+              
       if(serial_char == ';') comment_mode = true;
       if(!comment_mode) cmdbuffer[bufindw][serial_count++] = serial_char;
     }
@@ -841,6 +860,7 @@ void get_command()
        (serial_char == ':' && comment_mode == false) ||
        serial_count >= (MAX_CMD_SIZE - 1)||n==-1)
     {
+      /* AEther deleted
       if(card.eof() || n==-1){
         SERIAL_PROTOCOLLNPGM(MSG_FILE_PRINTED);
         stoptime=millis();
@@ -857,6 +877,8 @@ void get_command()
         card.checkautostart(true);
 
       }
+      */
+
       if(!serial_count)
       {
         comment_mode = false; //for new command
@@ -1047,507 +1069,14 @@ void process_commands()
   char *starpos = NULL;
 
   printing_state = PRINT_STATE_NORMAL;
-  if(code_seen("Q"))
-  {
-    
-    switch((int)code_value())
-    {
-      case 11:
-      {
-        if(code_seen('A')) brim_feed_d = code_value();
-        if(code_seen('S')) brim_flow_d = code_value();
-        if(code_seen('D')) brim_fan_d = code_value();
-        break;
-      }
-
-      case 12:
-      {
-        if(code_seen('A')) brim_feed_n = code_value();
-        if(code_seen('S')) brim_flow_n = code_value();
-        if(code_seen('D')) brim_fan_n = code_value();
-        break;
-      }
-
-      case 13:
-      {
-        if(code_seen('A')) brim_feed_b = code_value();
-        if(code_seen('S')) brim_flow_b = code_value();
-        if(code_seen('D')) brim_fan_b = code_value();
-        break;
-      }
-
-      case 21:
-      {
-        if(code_seen('A')) first_feed_d = code_value();
-        if(code_seen('S')) first_flow_d = code_value();
-        if(code_seen('D')) first_fan_d = code_value();
-        break;
-      }
-
-      case 22:
-      {
-        if(code_seen('A')) first_feed_n = code_value();
-        if(code_seen('S')) first_flow_n = code_value();
-        if(code_seen('D')) first_fan_n = code_value();
-        break;
-      }
-
-      case 23:
-      {
-        if(code_seen('A')) first_feed_b = code_value();
-        if(code_seen('S')) first_flow_b = code_value();
-        if(code_seen('D')) first_fan_b = code_value();
-        break;
-      }
-
-      case 31:
-      {
-        if(code_seen('A')) support_feed_d = code_value();
-        if(code_seen('S')) support_flow_d = code_value();
-        if(code_seen('D')) support_fan_d = code_value();
-        break;
-      }
-
-      case 32:
-      {
-        if(code_seen('A')) support_feed_n = code_value();
-        if(code_seen('S')) support_flow_n = code_value();
-        if(code_seen('D')) support_fan_n = code_value();
-        break;
-      }
-
-      case 33:
-      {
-        if(code_seen('A')) support_feed_b = code_value();
-        if(code_seen('S')) support_flow_b = code_value();
-        if(code_seen('D')) support_fan_b = code_value();
-        break;
-      }
-
-      case 41:
-      {
-        if(code_seen('A')) interfacetop_feed_d = code_value();
-        if(code_seen('S')) interfacetop_flow_d = code_value();
-        if(code_seen('D')) interfacetop_fan_d = code_value();
-        break;
-      }
-
-      case 42:
-      {
-        if(code_seen('A')) interfacetop_feed_n = code_value();
-        if(code_seen('S')) interfacetop_flow_n = code_value();
-        if(code_seen('D')) interfacetop_fan_n = code_value();
-        break;
-      }
- 
-      case 43:
-      {
-        if(code_seen('A')) interfacetop_feed_b = code_value();
-        if(code_seen('S')) interfacetop_flow_b = code_value();
-        if(code_seen('D')) interfacetop_fan_b = code_value();
-        break;
-      }
- 
-      case 51:
-      {
-        if(code_seen('A')) bottom_feed_d = code_value();
-        if(code_seen('S')) bottom_flow_d = code_value();
-        if(code_seen('D')) bottom_fan_d = code_value();
-        break;
-      }
-
-      case 52:
-      {
-        if(code_seen('A')) bottom_feed_n = code_value();
-        if(code_seen('S')) bottom_flow_n = code_value();
-        if(code_seen('D')) bottom_fan_n = code_value();
-        break;
-      }
-
-      case 53:
-      {
-        if(code_seen('A')) bottom_feed_b = code_value();
-        if(code_seen('S')) bottom_flow_b = code_value();
-        if(code_seen('D')) bottom_fan_b = code_value();
-        break;
-      }
-
-      case 61:
-      {
-        if(code_seen('A')) outer_feed_d = code_value();
-        if(code_seen('S')) outer_flow_d = code_value();
-        if(code_seen('D')) outer_fan_d = code_value();
-        break;
-      }
-  
-      case 62:
-      {
-        if(code_seen('A')) outer_feed_n = code_value();
-        if(code_seen('S')) outer_flow_n = code_value();
-        if(code_seen('D')) outer_fan_n = code_value();
-        break;
-      }
-
-      case 63:
-      {
-        if(code_seen('A')) outer_feed_b = code_value();
-        if(code_seen('S')) outer_flow_b = code_value();
-        if(code_seen('D')) outer_fan_b = code_value();
-        break;
-      }
-
-      case 71:
-      {
-        if(code_seen('A')) inner_feed_d = code_value();
-        if(code_seen('S')) inner_flow_d = code_value();
-        if(code_seen('D')) inner_fan_d = code_value();
-        break;
-      }
-
-      case 72:
-      {
-        if(code_seen('A')) inner_feed_n = code_value();
-        if(code_seen('S')) inner_flow_n = code_value();
-        if(code_seen('D')) inner_fan_n = code_value();
-        break;
-      }
-
-      case 73:
-      {
-        if(code_seen('A')) inner_feed_b = code_value();
-        if(code_seen('S')) inner_flow_b = code_value();
-        if(code_seen('D')) inner_fan_b = code_value();
-        break;
-      }
-  
-      case 81:
-      {
-        if(code_seen('A')) infill_feed_d = code_value();
-        if(code_seen('S')) infill_flow_d = code_value();
-        if(code_seen('D')) infill_fan_d = code_value();
-        break;
-      }
-   
-      case 82:
-      {
-        if(code_seen('A')) infill_feed_n = code_value();
-        if(code_seen('S')) infill_flow_n = code_value();
-        if(code_seen('D')) infill_fan_n = code_value();
-        break;
-      }
- 
-      case 83:
-      {
-        if(code_seen('A')) infill_feed_b = code_value();
-        if(code_seen('S')) infill_flow_b = code_value();
-        if(code_seen('D')) infill_fan_b = code_value();
-        break;
-      }
- 
-      case 91:
-      {
-        if(code_seen('A')) top_feed_d = code_value();
-        if(code_seen('S')) top_flow_d = code_value();
-        if(code_seen('D')) top_fan_d = code_value();
-        break;
-      }
- 
-      case 92:
-      {
-        if(code_seen('A')) top_feed_n = code_value();
-        if(code_seen('S')) top_flow_n = code_value();
-        if(code_seen('D')) top_fan_n = code_value();
-        break;
-      }
-
-      case 93:
-      {
-        if(code_seen('A')) top_feed_b = code_value();
-        if(code_seen('S')) top_flow_b = code_value();
-        if(code_seen('D')) top_fan_b = code_value();
-        break;
-      }
-
-      case 101:
-      {
-        if(code_seen('A')) interfacebot_feed_d = code_value();
-        if(code_seen('S')) interfacebot_flow_d = code_value();
-        if(code_seen('D')) interfacebot_fan_d = code_value();
-        break;
-      }
-
-      case 102:
-      {
-        if(code_seen('A')) interfacebot_feed_n = code_value();
-        if(code_seen('S')) interfacebot_flow_n = code_value();
-        if(code_seen('D')) interfacebot_fan_n = code_value();
-        break;
-      }
-
-      case 103:
-      {
-        if(code_seen('A')) interfacebot_feed_b = code_value();
-        if(code_seen('S')) interfacebot_flow_b = code_value();
-        if(code_seen('D')) interfacebot_fan_b = code_value();
-        break;
-      }
-
-      case 111:
-      {
-        if(code_seen('A')) travel_feed_d = code_value();
-        if(code_seen('S')) travel_flow_d = code_value();
-        if(code_seen('D')) travel_fan_d = code_value();
-        break;
-      }
-
-      case 112:
-      {
-        if(code_seen('A')) travel_feed_n = code_value();
-        if(code_seen('S')) travel_flow_n = code_value();
-        if(code_seen('D')) travel_fan_n = code_value();
-        break;
-      }
-         
-      case 113:
-      {        
-        if(code_seen('A')) 
-          travel_feed_b = code_value();
-        if(code_seen('S')) 
-          travel_flow_b = code_value();
-        if(code_seen('D')) 
-          travel_fan_b = code_value();
-        break;
-      }
- 
-    }
-  }
-
-  else if(code_seen("H"))
-  {
-    switch((int)code_value())
-    {
-    case 1:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        SERIAL_ECHOLN("poep");
-        feedrate = brim_feed_d;
-        extrudemultiply[active_extruder] = brim_flow_d;
-        fanSpeed = brim_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        SERIAL_ECHOLN("poep2  hoi");
-        SERIAL_ECHOLN(brim_feed_n);
-        
-        feedrate = brim_feed_n;
-        extrudemultiply[active_extruder] = brim_flow_n;
-        fanSpeed = brim_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = brim_feed_b;
-        extrudemultiply[active_extruder] = brim_flow_b;
-        fanSpeed = brim_fan_b;
-      }
-      break;
-
-    case 2:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = first_feed_d;
-        extrudemultiply[active_extruder] = first_flow_d;
-        fanSpeed = first_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = first_feed_n;
-        extrudemultiply[active_extruder] = first_flow_n;
-        fanSpeed = first_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = first_feed_b;
-        extrudemultiply[active_extruder] = first_flow_b;
-        fanSpeed = first_fan_b;
-      }
-      break;
-
-    case 3:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = support_feed_d;
-        extrudemultiply[active_extruder] = support_flow_d;
-        fanSpeed = support_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = support_feed_n;
-        extrudemultiply[active_extruder] = support_flow_n;
-        fanSpeed = support_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = support_feed_b;
-        extrudemultiply[active_extruder] = support_flow_b;
-        fanSpeed = support_fan_b;
-      }
-      break;
-
-    case 4:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = interfacetop_feed_d;
-        extrudemultiply[active_extruder] = interfacetop_flow_d;
-        fanSpeed = interfacetop_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = interfacetop_feed_n;
-        extrudemultiply[active_extruder] = interfacetop_flow_n;
-        fanSpeed = interfacetop_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = interfacetop_feed_b;
-        extrudemultiply[active_extruder] = interfacetop_flow_b;
-        fanSpeed = interfacetop_fan_b;
-      }
-      break;
-
-    case 5:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = bottom_feed_d;
-        extrudemultiply[active_extruder] = bottom_flow_d;
-        fanSpeed = bottom_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = bottom_feed_n;
-        extrudemultiply[active_extruder] = bottom_flow_n;
-        fanSpeed = bottom_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = bottom_feed_b;
-        extrudemultiply[active_extruder] = bottom_flow_b;
-        fanSpeed = bottom_fan_b;
-      }
-      break;
-
-    case 6:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = outer_feed_d;
-        extrudemultiply[active_extruder] = outer_flow_d;
-        fanSpeed = outer_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = outer_feed_n;
-        extrudemultiply[active_extruder] = outer_flow_n;
-        fanSpeed = outer_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = outer_feed_b;
-        extrudemultiply[active_extruder] = outer_flow_b;
-        fanSpeed = outer_fan_b;
-      }
-      break;
-
-    case 7:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = inner_feed_d;
-        extrudemultiply[active_extruder] = inner_flow_d;
-        fanSpeed = inner_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = inner_feed_n;
-        extrudemultiply[active_extruder] = inner_flow_n;
-        fanSpeed = inner_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = inner_feed_b;
-        extrudemultiply[active_extruder] = inner_flow_b;
-        fanSpeed = inner_fan_b;
-      }
-      break;
-
-    case 8:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = infill_feed_d;
-        extrudemultiply[active_extruder] = infill_flow_d;
-        fanSpeed = infill_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = infill_feed_n;
-        extrudemultiply[active_extruder] = infill_flow_n;
-        fanSpeed = infill_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = infill_feed_b;
-        extrudemultiply[active_extruder] = infill_flow_b;
-        fanSpeed = infill_fan_b;
-      }
-      break;
-    
-    case 9:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = top_feed_d;
-        extrudemultiply[active_extruder] = top_flow_d;
-        fanSpeed = top_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = top_feed_n;
-        extrudemultiply[active_extruder] = top_flow_n;
-        fanSpeed = top_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = top_feed_b;
-        extrudemultiply[active_extruder] = top_flow_b;
-        fanSpeed = top_fan_b;
-      }
-      break;
-    
-    case 10:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = interfacebot_feed_d;
-        extrudemultiply[active_extruder] = interfacebot_flow_d;
-        fanSpeed = interfacebot_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = interfacebot_feed_n;
-        extrudemultiply[active_extruder] = interfacebot_flow_n;
-        fanSpeed = interfacebot_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = interfacebot_feed_b;
-        extrudemultiply[active_extruder] = interfacebot_flow_b;
-        fanSpeed = interfacebot_fan_b;
-      }
-      break;
-    
-    case 11:
-
-      if(print_quality == PRINT_QUALITY_DRAFT){
-        feedrate = travel_feed_d;
-        extrudemultiply[active_extruder] = travel_flow_d;
-        fanSpeed = travel_fan_d;
-      }
-      if(print_quality == PRINT_QUALITY_NORMAL){
-        feedrate = travel_feed_n;
-        extrudemultiply[active_extruder] = travel_flow_n;
-        fanSpeed = travel_fan_n;
-      }
-      if(print_quality == PRINT_QUALITY_BEST){
-        feedrate = travel_feed_b;
-        extrudemultiply[active_extruder] = travel_flow_b;
-        fanSpeed = travel_fan_b;
-      }
-      break;
-    }
-  }
-
-  else if(code_seen('G'))
+  if (code_seen('G'))
   {
     switch((int)code_value())
     {
     case 0: // G0 -> G1
     case 1: // G1
       if(Stopped == false) {
+        // enquecommand_P(PSTR("F", feedrate));
         get_coordinates(); // For X Y Z E F
         prepare_move();
 
@@ -1831,6 +1360,605 @@ void process_commands()
       break;
     }
   }
+  else if(code_seen('Q'))
+  {
+    if (header == true)
+      switch((int)code_value())
+      {
+        case 11:
+        {
+          if(code_seen('A')) brim_feed_d = code_value();
+          if(code_seen('S')) brim_flow_d = code_value();
+          if(code_seen('D')) brim_fan_d = code_value();
+          break;
+        }
+
+        case 12:
+        {
+          if(code_seen('A')) brim_feed_n = code_value();
+          if(code_seen('S')) brim_flow_n = code_value();
+          if(code_seen('D')) brim_fan_n = code_value();
+          break;
+        }
+
+        case 13:
+        {
+          if(code_seen('A')) brim_feed_b = code_value();
+          if(code_seen('S')) brim_flow_b = code_value();
+          if(code_seen('D')) brim_fan_b = code_value();
+          break;
+        }
+
+        case 21:
+        {
+          if(code_seen('A')) first_feed_d = code_value();
+          if(code_seen('S')) first_flow_d = code_value();
+          if(code_seen('D')) first_fan_d = code_value();
+          break;
+        }
+
+        case 22:
+        {
+          if(code_seen('A')) first_feed_n = code_value();
+          if(code_seen('S')) first_flow_n = code_value();
+          if(code_seen('D')) first_fan_n = code_value();
+          break;
+        }
+
+        case 23:
+        {
+          if(code_seen('A')) first_feed_b = code_value();
+          if(code_seen('S')) first_flow_b = code_value();
+          if(code_seen('D')) first_fan_b = code_value();
+          break;
+        }
+
+        case 31:
+        {
+          if(code_seen('A')) support_feed_d = code_value();
+          if(code_seen('S')) support_flow_d = code_value();
+          if(code_seen('D')) support_fan_d = code_value();
+          break;
+        }
+
+        case 32:
+        {
+          if(code_seen('A')) support_feed_n = code_value();
+          if(code_seen('S')) support_flow_n = code_value();
+          if(code_seen('D')) support_fan_n = code_value();
+          break;
+        }
+
+        case 33:
+        {
+          if(code_seen('A')) support_feed_b = code_value();
+          if(code_seen('S')) support_flow_b = code_value();
+          if(code_seen('D')) support_fan_b = code_value();
+          break;
+        }
+
+        case 41:
+        {
+          if(code_seen('A')) interfacetop_feed_d = code_value();
+          if(code_seen('S')) interfacetop_flow_d = code_value();
+          if(code_seen('D')) interfacetop_fan_d = code_value();
+          break;
+        }
+
+        case 42:
+        {
+          if(code_seen('A')) interfacetop_feed_n = code_value();
+          if(code_seen('S')) interfacetop_flow_n = code_value();
+          if(code_seen('D')) interfacetop_fan_n = code_value();
+          break;
+        }
+  
+        case 43:
+        {
+          if(code_seen('A')) interfacetop_feed_b = code_value();
+          if(code_seen('S')) interfacetop_flow_b = code_value();
+          if(code_seen('D')) interfacetop_fan_b = code_value();
+          break;
+        }
+  
+        case 51:
+        {
+          if(code_seen('A')) bottom_feed_d = code_value();
+          if(code_seen('S')) bottom_flow_d = code_value();
+          if(code_seen('D')) bottom_fan_d = code_value();
+          break;
+        }
+
+        case 52:
+        {
+          if(code_seen('A')) bottom_feed_n = code_value();
+          if(code_seen('S')) bottom_flow_n = code_value();
+          if(code_seen('D')) bottom_fan_n = code_value();
+          break;
+        }
+
+        case 53:
+        {
+          if(code_seen('A')) bottom_feed_b = code_value();
+          if(code_seen('S')) bottom_flow_b = code_value();
+          if(code_seen('D')) bottom_fan_b = code_value();
+          break;
+        }
+
+        case 61:
+        {
+          if(code_seen('A')) outer_feed_d = code_value();
+          if(code_seen('S')) outer_flow_d = code_value();
+          if(code_seen('D')) outer_fan_d = code_value();
+          break;
+        }
+    
+        case 62:
+        {
+          if(code_seen('A')) outer_feed_n = code_value();
+          if(code_seen('S')) outer_flow_n = code_value();
+          if(code_seen('D')) outer_fan_n = code_value();
+          break;
+        }
+
+        case 63:
+        {
+          if(code_seen('A')) outer_feed_b = code_value();
+          if(code_seen('S')) outer_flow_b = code_value();
+          if(code_seen('D')) outer_fan_b = code_value();
+          break;
+        }
+
+        case 71:
+        {
+          if(code_seen('A')) inner_feed_d = code_value();
+          if(code_seen('S')) inner_flow_d = code_value();
+          if(code_seen('D')) inner_fan_d = code_value();
+          break;
+        }
+
+        case 72:
+        {
+          if(code_seen('A')) inner_feed_n = code_value();
+          if(code_seen('S')) inner_flow_n = code_value();
+          if(code_seen('D')) inner_fan_n = code_value();
+          break;
+        }
+
+        case 73:
+        {
+          if(code_seen('A')) inner_feed_b = code_value();
+          if(code_seen('S')) inner_flow_b = code_value();
+          if(code_seen('D')) inner_fan_b = code_value();
+          break;
+        }
+    
+        case 81:
+        {
+          if(code_seen('A')) infill_feed_d = code_value();
+          if(code_seen('S')) infill_flow_d = code_value();
+          if(code_seen('D')) infill_fan_d = code_value();
+          break;
+        }
+    
+        case 82:
+        {
+          if(code_seen('A')) infill_feed_n = code_value();
+          if(code_seen('S')) infill_flow_n = code_value();
+          if(code_seen('D')) infill_fan_n = code_value();
+          break;
+        }
+  
+        case 83:
+        {
+          if(code_seen('A')) infill_feed_b = code_value();
+          if(code_seen('S')) infill_flow_b = code_value();
+          if(code_seen('D')) infill_fan_b = code_value();
+          break;
+        }
+  
+        case 91:
+        {
+          if(code_seen('A')) top_feed_d = code_value();
+          if(code_seen('S')) top_flow_d = code_value();
+          if(code_seen('D')) top_fan_d = code_value();
+          break;
+        }
+  
+        case 92:
+        {
+          if(code_seen('A')) top_feed_n = code_value();
+          if(code_seen('S')) top_flow_n = code_value();
+          if(code_seen('D')) top_fan_n = code_value();
+          break;
+        }
+
+        case 93:
+        {
+          if(code_seen('A')) top_feed_b = code_value();
+          if(code_seen('S')) top_flow_b = code_value();
+          if(code_seen('D')) top_fan_b = code_value();
+          break;
+        }
+
+        case 101:
+        {
+          if(code_seen('A')) interfacebot_feed_d = code_value();
+          if(code_seen('S')) interfacebot_flow_d = code_value();
+          if(code_seen('D')) interfacebot_fan_d = code_value();
+          break;
+        }
+
+        case 102:
+        {
+          if(code_seen('A')) interfacebot_feed_n = code_value();
+          if(code_seen('S')) interfacebot_flow_n = code_value();
+          if(code_seen('D')) interfacebot_fan_n = code_value();
+          break;
+        }
+
+        case 103:
+        {
+          if(code_seen('A')) interfacebot_feed_b = code_value();
+          if(code_seen('S')) interfacebot_flow_b = code_value();
+          if(code_seen('D')) interfacebot_fan_b = code_value();
+          break;
+        }
+
+        case 111:
+        {
+          if(code_seen('A')) travel_feed_d = code_value();
+          if(code_seen('S')) travel_flow_d = code_value();
+          if(code_seen('D')) travel_fan_d = code_value();
+          break;
+        }
+
+        case 112:
+        {
+          if(code_seen('A')) travel_feed_n = code_value();
+          if(code_seen('S')) travel_flow_n = code_value();
+          if(code_seen('D')) travel_fan_n = code_value();
+          break;
+        }
+          
+        case 113:
+        {        
+          if(code_seen('A')) 
+            travel_feed_b = code_value();
+          if(code_seen('S')) 
+            travel_flow_b = code_value();
+          if(code_seen('D')) 
+            travel_fan_b = code_value();
+          break;
+        }
+      }
+  }
+
+  else if(code_seen('H'))
+  {
+    switch((int)code_value())
+    {
+    case 1:
+      if (BRIM == true)
+      {
+        type_index = 1;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = brim_feed_d * 60;
+          extrudemultiply[active_extruder] = brim_flow_d;
+          fanSpeed = brim_fan_d;
+          }
+        
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = brim_feed_n * 60;
+          extrudemultiply[active_extruder] = brim_flow_n;
+          fanSpeed = brim_fan_n;
+          }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = brim_feed_b * 60;
+          extrudemultiply[active_extruder] = brim_flow_b;
+          fanSpeed = brim_fan_b;
+          }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+    
+    case 2:
+      if (FIRST == true)
+      { 
+        type_index = 2;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = first_feed_d * 60;
+          extrudemultiply[active_extruder] = first_flow_d;
+          fanSpeed = first_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = first_feed_n * 60;
+          extrudemultiply[active_extruder] = first_flow_n;
+          fanSpeed = first_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = first_feed_b * 60;
+          extrudemultiply[active_extruder] = first_flow_b;
+          fanSpeed = first_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+    
+    case 3:
+    if (SUPPORT == true)
+    {
+      type_index = 3;
+      if(print_quality == PRINT_QUALITY_DRAFT){
+        feedrate = support_feed_d * 60;
+        extrudemultiply[active_extruder] = support_flow_d;
+        fanSpeed = support_fan_d;
+      }
+      if(print_quality == PRINT_QUALITY_NORMAL){
+        feedrate = support_feed_n * 60;
+        extrudemultiply[active_extruder] = support_flow_n;
+        fanSpeed = support_fan_n;
+      }
+      if(print_quality == PRINT_QUALITY_BEST){
+        feedrate = support_feed_b * 60;
+        extrudemultiply[active_extruder] = support_flow_b;
+        fanSpeed = support_fan_b;
+      }
+      if(Stopped == false)
+      {
+        get_coordinates(); // For X Y Z E F
+        prepare_move();
+        return;
+      }
+    }
+    else
+      break;
+
+    case 4:
+    if (ROOF == true)
+    {
+      type_index = 4;
+      if(print_quality == PRINT_QUALITY_DRAFT){
+        feedrate = interfacetop_feed_d * 60;
+        extrudemultiply[active_extruder] = interfacetop_flow_d;
+        fanSpeed = interfacetop_fan_d;
+      }
+      if(print_quality == PRINT_QUALITY_NORMAL){
+        feedrate = interfacetop_feed_n * 60;
+        extrudemultiply[active_extruder] = interfacetop_flow_n;
+        fanSpeed = interfacetop_fan_n;
+      }
+      if(print_quality == PRINT_QUALITY_BEST){
+        feedrate = interfacetop_feed_b * 60;
+        extrudemultiply[active_extruder] = interfacetop_flow_b;
+        fanSpeed = interfacetop_fan_b;
+      }
+      if(Stopped == false)
+      {
+        get_coordinates(); // For X Y Z E F
+        prepare_move();
+        return;
+      }
+    }
+    else
+      break;
+
+    case 5:
+      if (BOTTOM == true)
+      {
+        type_index = 5;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = bottom_feed_d * 60;
+          extrudemultiply[active_extruder] = bottom_flow_d;
+          fanSpeed = bottom_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = bottom_feed_n * 60;
+          extrudemultiply[active_extruder] = bottom_flow_n;
+          fanSpeed = bottom_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = bottom_feed_b * 60;
+          extrudemultiply[active_extruder] = bottom_flow_b;
+          fanSpeed = bottom_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+        
+    case 6:
+      if (OUTER == true)
+      {
+        type_index = 6;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = outer_feed_d * 60;
+          extrudemultiply[active_extruder] = outer_flow_d;
+          fanSpeed = outer_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = outer_feed_n * 60;
+          extrudemultiply[active_extruder] = outer_flow_n;
+          fanSpeed = outer_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = outer_feed_b * 60;
+          extrudemultiply[active_extruder] = outer_flow_b;
+          fanSpeed = outer_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+          
+    case 7:
+      if (INNER == true)
+      {
+        type_index = 7;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = inner_feed_d * 60;
+          extrudemultiply[active_extruder] = inner_flow_d;
+          fanSpeed = inner_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = inner_feed_n * 60;
+          extrudemultiply[active_extruder] = inner_flow_n;
+          fanSpeed = inner_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = inner_feed_b * 60;
+          extrudemultiply[active_extruder] = inner_flow_b;
+          fanSpeed = inner_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+
+    case 8:
+      if (INFILL == true)
+      {
+        type_index = 8;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = infill_feed_d * 60;
+          extrudemultiply[active_extruder] = infill_flow_d;
+          fanSpeed = infill_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = infill_feed_n * 60;
+          extrudemultiply[active_extruder] = infill_flow_n;
+          fanSpeed = infill_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = infill_feed_b * 60;
+          extrudemultiply[active_extruder] = infill_flow_b;
+          fanSpeed = infill_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+
+    case 9:
+      if (TOP == true)
+      {
+        type_index = 9;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = top_feed_d * 60;
+          extrudemultiply[active_extruder] = top_flow_d;
+          fanSpeed = top_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = top_feed_n * 60;
+          extrudemultiply[active_extruder] = top_flow_n;
+          fanSpeed = top_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = top_feed_b * 60;
+          extrudemultiply[active_extruder] = top_flow_b;
+          fanSpeed = top_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+
+    case 10:
+      if (FLOOR == true)
+      {
+        type_index = 10;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = interfacebot_feed_d * 60;
+          extrudemultiply[active_extruder] = interfacebot_flow_d;
+          fanSpeed = interfacebot_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = interfacebot_feed_n * 60;
+          extrudemultiply[active_extruder] = interfacebot_flow_n;
+          fanSpeed = interfacebot_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = interfacebot_feed_b * 60;
+          extrudemultiply[active_extruder] = interfacebot_flow_b;
+          fanSpeed = interfacebot_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+     
+    case 11:
+      if (TRAVEL == true)
+      {  
+        type_index = 11;
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = travel_feed_d * 60;
+          extrudemultiply[active_extruder] = travel_flow_d;
+          fanSpeed = travel_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = travel_feed_n * 60;
+          extrudemultiply[active_extruder] = travel_flow_n;
+          fanSpeed = travel_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = travel_feed_b * 60;
+          extrudemultiply[active_extruder] = travel_flow_b;
+          fanSpeed = travel_fan_b;
+        }
+        if(Stopped == false)
+        {
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+    }
+  }
 
   else if(code_seen('M'))
   {
@@ -1838,6 +1966,7 @@ void process_commands()
     {
 #ifdef ULTIPANEL
     case 0: // M0 - Unconditional stop - Wait for user button press on LCD
+
     case 1: // M1 - Conditional stop - Wait for user button press on LCD
     {
       printing_state = PRINT_STATE_WAIT_USER;
@@ -1870,6 +1999,7 @@ void process_commands()
 #endif
 #ifdef ENABLE_ULTILCD2
     case 0: // M0 - Unconditional stop - Wait for user button press on LCD
+
     case 1: // M1 - Conditional stop - Wait for user button press on LCD
     {
         card.pause = true;
