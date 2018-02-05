@@ -11,6 +11,7 @@ void infill_menu();
 void top_menu();
 void interface_bot_menu();
 void travel_menu();
+void retract_menu();
 
 void quality_menu();
 

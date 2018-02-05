@@ -264,9 +264,14 @@ extern bool INFILL;
 extern bool TOP;
 extern bool FLOOR;
 extern bool TRAVEL;
+extern bool RETRACT;
 
 extern bool header;
 extern int type_index;
+
+extern long foundIndex;
+extern long trueIndex;
+
 
 //FEEDS
 extern float brim_feed_d;
@@ -312,6 +317,10 @@ extern float interfacebot_feed_b;
 extern float travel_feed_d;
 extern float travel_feed_n;
 extern float travel_feed_b;
+
+extern float retraction_feed_d;
+extern float retraction_feed_n;
+extern float retraction_feed_b;
 
 //FLOWS
 extern int brim_flow_d;

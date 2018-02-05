@@ -42,6 +42,9 @@ static void lcd_menu_print_tune();
 static void lcd_menu_print_tune_retraction();
 static void lcd_menu_print_pause();
 static void lcd_advanced2_feedrates();
+static void lcd_menu_print_save();
+static void doSaveConfig();
+
 
 bool primed = false;
 static bool pauseRequested = false;
@@ -175,6 +178,7 @@ static void doStartPrint()
     primed = true;
 
     postMenuCheck = checkPrintFinished;
+    checkPrintFinished();
     card.startFileprint();
     lifetime_stats_print_start();
     starttime = millis();
@@ -748,13 +752,12 @@ static void lcd_menu_print_error_position()
 
 static void lcd_menu_print_classic_warning()
 {
-    lcd_question_screen(quality_menu, doStartPrint, PSTR("CONTINUE"), lcd_menu_print_select, NULL, PSTR("CANCEL"));
+    lcd_question_screen(lcd_menu_header_select, doStartPrint, PSTR("CONTINUE"), lcd_menu_print_select, NULL, PSTR("CANCEL"));
 
     lcd_lib_draw_string_centerP(10, PSTR("This file will"));
     lcd_lib_draw_string_centerP(20, PSTR("override machine"));
     lcd_lib_draw_string_centerP(30, PSTR("setting with setting"));
     lcd_lib_draw_string_centerP(40, PSTR("from the slicer."));
-
     lcd_lib_update_screen();
 }
 
@@ -790,6 +793,7 @@ static void postPrintReady()
 
 static void lcd_menu_print_ready()
 {
+    
     if (led_mode == LED_MODE_WHILE_PRINTING)
         analogWrite(LED_PIN, 0);
     else if (led_mode == LED_MODE_BLINK_ON_DONE)
@@ -830,14 +834,30 @@ static void lcd_menu_print_ready_cooled_down()
         analogWrite(LED_PIN, 0);
     else if (led_mode == LED_MODE_BLINK_ON_DONE)
         analogWrite(LED_PIN, (led_glow << 1) * int(led_brightness_level) / 100);
-    lcd_info_screen(lcd_menu_main, postPrintReady, PSTR("BACK TO MENU"));
+    lcd_info_screen(lcd_menu_print_save, postPrintReady, PSTR("BACK TO MENU"));
 
     LED_GLOW();
+
     lcd_lib_draw_string_centerP(10, PSTR("Print finished"));
     lcd_lib_draw_string_centerP(30, PSTR("You can remove"));
     lcd_lib_draw_string_centerP(40, PSTR("the print."));
 
     lcd_lib_update_screen();
+}
+
+static void lcd_menu_print_save()
+{
+    LED_GLOW();
+    lcd_question_screen(lcd_menu_main, doSaveConfig, PSTR("YES"), lcd_menu_main, NULL, PSTR("NO"));
+
+    lcd_lib_draw_string_centerP(20, PSTR("Save Settings?"));
+
+    lcd_lib_update_screen();
+}
+
+static void doSaveConfig()
+{
+    Config_StoreSettings();
 }
 
 static char* tune_item_callback(uint8_t nr)

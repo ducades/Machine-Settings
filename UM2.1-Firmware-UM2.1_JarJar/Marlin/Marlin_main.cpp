@@ -36,6 +36,7 @@
 #include "temperature.h"
 #include "motion_control.h"
 #include "cardreader.h"
+#include "SdBaseFile.h"
 #include "watchdog.h"
 #include "ConfigurationStore.h"
 #include "lifetime_stats.h"
@@ -172,63 +173,72 @@ int feedmultiply=100; //100->1 200->2
 
 bool BRIM = true;
 bool FIRST = true;
-bool SUPPORT = true;
-bool ROOF = true;
+bool SUPPORT = false;
+bool ROOF = false;
 bool BOTTOM = true;
 bool OUTER = true;
 bool INNER = true;
-bool INFILL = true;
-bool TOP = true;
-bool FLOOR = true;
+bool INFILL = false;
+bool TOP = false;
+bool FLOOR = false;
 bool TRAVEL = true;
+bool RETRACT = true;
 
-bool header = false;
+bool header = true;
+
 int type_index = 0;
 
+long foundIndex = 0000000000;
+long trueIndex = 0000000000;
+
 //FEEDS
-float brim_feed_d = 600;
-float brim_feed_n = 600;
-float brim_feed_b = 600;
+float brim_feed_d = 60;
+float brim_feed_n = 60;
+float brim_feed_b = 60;
 
-float first_feed_d = 600;
-float first_feed_n = 600;
-float first_feed_b = 600;
+float first_feed_d = 60;
+float first_feed_n = 60;
+float first_feed_b = 60;
 
-float support_feed_d = 600;
-float support_feed_n = 600;
-float support_feed_b = 600;
+float support_feed_d = 60;
+float support_feed_n = 60;
+float support_feed_b = 60;
 
-float interfacetop_feed_d = 600;
-float interfacetop_feed_n = 600;
-float interfacetop_feed_b = 600;
+float interfacetop_feed_d = 60;
+float interfacetop_feed_n = 60;
+float interfacetop_feed_b = 60;
 
-float bottom_feed_d = 600;
-float bottom_feed_n = 600;
-float bottom_feed_b = 600;
+float bottom_feed_d = 60;
+float bottom_feed_n = 60;
+float bottom_feed_b = 60;
 
-float outer_feed_d = 600;
-float outer_feed_n = 600;
-float outer_feed_b = 600;
+float outer_feed_d = 60;
+float outer_feed_n = 60;
+float outer_feed_b = 60;
 
-float inner_feed_d = 600;
-float inner_feed_n = 600;
-float inner_feed_b = 600;
+float inner_feed_d = 60;
+float inner_feed_n = 60;
+float inner_feed_b = 60;
 
-float infill_feed_d = 600;
-float infill_feed_n = 600;
-float infill_feed_b = 600;
+float infill_feed_d = 60;
+float infill_feed_n = 60;
+float infill_feed_b = 60;
 
-float top_feed_d = 600;
-float top_feed_n = 600;
-float top_feed_b = 600;
+float top_feed_d = 60;
+float top_feed_n = 60;
+float top_feed_b = 60;
 
-float interfacebot_feed_d = 600;
-float interfacebot_feed_n = 600;
-float interfacebot_feed_b = 600;
+float interfacebot_feed_d = 60;
+float interfacebot_feed_n = 60;
+float interfacebot_feed_b = 60;
 
-float travel_feed_d = 600;
-float travel_feed_n = 600;
-float travel_feed_b = 600;
+float travel_feed_d = 60;
+float travel_feed_n = 60;
+float travel_feed_b = 60;
+
+float retraction_feed_d = 25;
+float retraction_feed_n = 25;
+float retraction_feed_b = 25;
 
 //FLOWS
 int brim_flow_d = 100;
@@ -276,49 +286,49 @@ int travel_flow_n = 100;
 int travel_flow_b = 100;
 
 //FANS
-int brim_fan_d = 100;
-int brim_fan_n = 100;
-int brim_fan_b = 100;
+int brim_fan_d = 255;
+int brim_fan_n = 255;
+int brim_fan_b = 255;
 
-int first_fan_d = 100;
-int first_fan_n = 100;
-int first_fan_b = 100;
+int first_fan_d = 255;
+int first_fan_n = 255;
+int first_fan_b = 255;
 
-int support_fan_d = 100;
-int support_fan_n = 100;
-int support_fan_b = 100;
+int support_fan_d = 255;
+int support_fan_n = 255;
+int support_fan_b = 255;
 
-int interfacetop_fan_d = 100;
-int interfacetop_fan_n = 100;
-int interfacetop_fan_b = 100;
+int interfacetop_fan_d = 255;
+int interfacetop_fan_n = 255;
+int interfacetop_fan_b = 255;
 
-int bottom_fan_d = 100;
-int bottom_fan_n = 100;
-int bottom_fan_b = 100;
+int bottom_fan_d = 255;
+int bottom_fan_n = 255;
+int bottom_fan_b = 255;
 
-int outer_fan_d = 100;
-int outer_fan_n = 100;
-int outer_fan_b = 100;
+int outer_fan_d = 255;
+int outer_fan_n = 255;
+int outer_fan_b = 255;
 
-int inner_fan_d = 100;
-int inner_fan_n = 100;
-int inner_fan_b = 100;
+int inner_fan_d = 255;
+int inner_fan_n = 255;
+int inner_fan_b = 255;
 
-int infill_fan_d = 100;
-int infill_fan_n = 100;
-int infill_fan_b = 100;
+int infill_fan_d = 255;
+int infill_fan_n = 255;
+int infill_fan_b = 255;
 
-int top_fan_d = 100;
-int top_fan_n = 100;
-int top_fan_b = 100;
+int top_fan_d = 255;
+int top_fan_n = 255;
+int top_fan_b = 255;
 
-int interfacebot_fan_d = 100;
-int interfacebot_fan_n = 100;
-int interfacebot_fan_b = 100;
+int interfacebot_fan_d = 255;
+int interfacebot_fan_n = 255;
+int interfacebot_fan_b = 255;
 
-int travel_fan_d = 100;
-int travel_fan_n = 100;
-int travel_fan_b = 100;
+int travel_fan_d = 255;
+int travel_fan_n = 255;
+int travel_fan_b = 255;
 
 int saved_feedmultiply;
 int extrudemultiply[EXTRUDERS]=ARRAY_BY_EXTRUDERS(100, 100, 100); //100->1 200->2
@@ -386,6 +396,8 @@ uint8_t printing_state;
 //===========================================================================
 const char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
 static float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
+
+
 #ifdef DELTA
 static float delta[3] = {0.0, 0.0, 0.0};
 #endif
@@ -860,7 +872,6 @@ void get_command()
        (serial_char == ':' && comment_mode == false) ||
        serial_count >= (MAX_CMD_SIZE - 1)||n==-1)
     {
-      /* AEther deleted
       if(card.eof() || n==-1){
         SERIAL_PROTOCOLLNPGM(MSG_FILE_PRINTED);
         stoptime=millis();
@@ -877,7 +888,7 @@ void get_command()
         card.checkautostart(true);
 
       }
-      */
+      
 
       if(!serial_count)
       {
@@ -1634,6 +1645,25 @@ void process_commands()
       }
   }
 
+  else if (code_seen('B'))
+  {
+    switch((int)code_value())
+    {
+      case 1:
+      {
+        if(code_seen('I'))
+          {
+          foundIndex = code_value_long();
+          SERIAL_PROTOCOLPGM("Index is: ");
+          SERIAL_PROTOCOL(foundIndex);
+          SERIAL_PROTOCOLLN("");
+
+          }
+        break;
+      }
+    }
+  }
+
   else if(code_seen('H'))
   {
     switch((int)code_value())
@@ -1666,8 +1696,11 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
-    
+      } 
+
     case 2:
       if (FIRST == true)
       { 
@@ -1695,7 +1728,10 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
+      }  
     
     case 3:
     if (SUPPORT == true)
@@ -1724,7 +1760,10 @@ void process_commands()
       }
     }
     else
+    {
+      card.setIndex(foundIndex);
       break;
+    }   
 
     case 4:
     if (ROOF == true)
@@ -1753,7 +1792,10 @@ void process_commands()
       }
     }
     else
+    {
+      card.setIndex(foundIndex);
       break;
+    } 
 
     case 5:
       if (BOTTOM == true)
@@ -1782,7 +1824,10 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
+      }   
         
     case 6:
       if (OUTER == true)
@@ -1811,7 +1856,10 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
+      }
           
     case 7:
       if (INNER == true)
@@ -1840,8 +1888,10 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
-
+      } 
     case 8:
       if (INFILL == true)
       {
@@ -1869,7 +1919,10 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
+      } 
 
     case 9:
       if (TOP == true)
@@ -1898,7 +1951,10 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
+      } 
 
     case 10:
       if (FLOOR == true)
@@ -1927,12 +1983,17 @@ void process_commands()
         }
       }
       else
+      {
+        card.setIndex(foundIndex);
         break;
-     
+      } 
+
     case 11:
+
       if (TRAVEL == true)
       {  
         type_index = 11;
+
         if(print_quality == PRINT_QUALITY_DRAFT){
           feedrate = travel_feed_d * 60;
           extrudemultiply[active_extruder] = travel_flow_d;
@@ -1950,6 +2011,39 @@ void process_commands()
         }
         if(Stopped == false)
         {
+
+          get_coordinates(); // For X Y Z E F
+          prepare_move();
+          return;
+        }
+      }
+      else
+        break;
+
+    case 12:
+
+      if (RETRACT == true)
+      {  
+        type_index = 11;
+
+        if(print_quality == PRINT_QUALITY_DRAFT){
+          feedrate = travel_feed_d * 60;
+          extrudemultiply[active_extruder] = travel_flow_d;
+          fanSpeed = travel_fan_d;
+        }
+        if(print_quality == PRINT_QUALITY_NORMAL){
+          feedrate = travel_feed_n * 60;
+          extrudemultiply[active_extruder] = travel_flow_n;
+          fanSpeed = travel_fan_n;
+        }
+        if(print_quality == PRINT_QUALITY_BEST){
+          feedrate = travel_feed_b * 60;
+          extrudemultiply[active_extruder] = travel_flow_b;
+          fanSpeed = travel_fan_b;
+        }
+        if(Stopped == false)
+        {
+
           get_coordinates(); // For X Y Z E F
           prepare_move();
           return;
@@ -1969,6 +2063,7 @@ void process_commands()
 
     case 1: // M1 - Conditional stop - Wait for user button press on LCD
     {
+      
       printing_state = PRINT_STATE_WAIT_USER;
       LCD_MESSAGEPGM(MSG_USERWAIT);
       codenum = 0;
