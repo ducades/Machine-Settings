@@ -178,7 +178,6 @@ static void doStartPrint()
     primed = true;
 
     postMenuCheck = checkPrintFinished;
-    checkPrintFinished();
     card.startFileprint();
     lifetime_stats_print_start();
     starttime = millis();
@@ -289,7 +288,7 @@ void lcd_sd_menu_details_callback(uint8_t nr)
                             else if (strncmp_P(buffer, PSTR(";NOZZLE_DIAMETER2:"), 18) == 0)
                                 LCD_DETAIL_CACHE_NOZZLE_DIAMETER(1) = strtod(buffer + 18, NULL);
                             else if (strncmp_P(buffer, PSTR(";MTYPE2:"), 8) == 0)
-                            {
+                            {g
                                 strncpy(LCD_DETAIL_CACHE_MATERIAL_TYPE(1), buffer + 8, 8);
                                 LCD_DETAIL_CACHE_MATERIAL_TYPE(1)[7] = '\0';
                             }
@@ -459,7 +458,11 @@ void lcd_menu_print_select()
                             retract_length = material[e].retraction_length[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
                         }
 
-
+                        enquecommand_P(PSTR("G28"));
+                        enquecommand_P(PSTR(HEATUP_POSITION_COMMAND));
+                        lcd_change_to_menu(lcd_menu_print_heatup);
+                        
+                        /*
                         //AEther
                         if (strcmp_P(buffer, PSTR(";Quality Setting:")) != 0)
                         {
@@ -477,7 +480,7 @@ void lcd_menu_print_select()
                             lcd_lib_clear();                            
                             lcd_change_to_menu(lcd_menu_header_select, 0); //lcd_change_to_menu(quality_menu, 0);
                         }
-
+                        */
 
                         if (strcasecmp(material[0].name, LCD_DETAIL_CACHE_MATERIAL_TYPE(0)) != 0)
                         {
@@ -708,7 +711,7 @@ static void lcd_menu_print_printing()
                 timeLeftSec = 1;
             else
                 timeLeftSec = totalTimeSec - printTimeSec;
-            //int_to_time_string(timeLeftSec, buffer);
+            int_to_time_string(timeLeftSec, buffer);
             //lcd_lib_draw_stringP(5, 10, PSTR("Time left"));
             //lcd_lib_draw_string(65, 10, buffer);
         }
