@@ -75,6 +75,26 @@ void lcd_update()
         if (led_glow == 126) led_glow_dir = 1;
     }
 
+    if (pulseCounter < 2000)
+    {
+        pulseCounter += 1;
+        if (pulseCounter < 64)
+        {
+            if (led_pulse_dir)
+            {
+                led_pulse-=4;
+                if (led_pulse == 0) led_pulse_dir = 0;
+            }else{
+                led_pulse+=4;
+                if (led_pulse == 128) led_pulse_dir = 1;
+            }
+        }
+    
+    }
+    else{
+        pulseCounter = 0;
+    }
+
     if (IsStopped())
     {
         lcd_lib_clear();
@@ -243,6 +263,7 @@ void doCooldown()
 
 void lcd_menu_main()
 {
+
     lcd_tripple_menu(PSTR("PRINT"), PSTR("MATERIAL"), PSTR("MAINTENANCE"));
 
     if (lcd_lib_button_pressed)

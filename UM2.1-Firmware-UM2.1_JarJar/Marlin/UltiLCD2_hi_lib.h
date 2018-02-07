@@ -109,9 +109,20 @@ extern uint8_t minProgress;
 
 extern uint8_t led_glow;
 extern uint8_t led_glow_dir;
-#define LED_NORMAL() lcd_lib_led2_color(20,20,20,20)
-#define LED_GLOW() lcd_lib_led_color(8 + led_glow, 8 + led_glow, 32 + led_glow)
+
+
+extern uint8_t led_pulse;
+extern uint8_t led_pulse_dir;
+extern uint8_t pulseCounter;
+
+#define LED_NORMAL() lcd_lib_led2_color(20,20,20,20);
+#define LED_GLOW() lcd_lib_led2_color(8 + led_glow, 8 + led_glow, 32 + led_glow, 10+led_glow);
 #define LED_GLOW_ERROR() lcd_lib_led2_color(led_glow,128-led_glow,led_glow,led_glow);
+
+#define LED_QUALITY_DRAFT() lcd_lib_led2_color(20 + led_pulse,20,20,20);
+#define LED_QUALITY_NORMAL() lcd_lib_led2_color(20,20 + led_pulse,20,20);
+#define LED_QUALITY_BEST() lcd_lib_led2_color(20,20,20 + led_pulse,20);
+
 
 //If we have a heated bed, then the heated bed menu entries have a size of 1, else they have a size of 0.
 #if TEMP_SENSOR_BED != 0

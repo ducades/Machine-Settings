@@ -14,5 +14,9 @@ void travel_menu();
 
 void quality_menu();
 
+void lcd_menu_header_select();
+void set_header_true();
+void set_header_false();
+
 extern bool tune_type;
 

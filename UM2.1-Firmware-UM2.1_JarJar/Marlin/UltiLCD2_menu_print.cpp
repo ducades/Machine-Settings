@@ -14,7 +14,7 @@
 #include "ConfigurationStore.h"
 #include "TweakMenu.h"
 
-#define HEATUP_POSITION_COMMAND "G1 F1200 X5 Y10"
+#define HEATUP_POSITION_COMMAND "G1 F3000 X5 Y10"
 
 uint8_t lcd_cache[LCD_CACHE_SIZE];
 #define LCD_CACHE_NR_OF_FILES() lcd_cache[(LCD_CACHE_COUNT*(LONG_FILENAME_LENGTH+2))]
@@ -455,12 +455,29 @@ void lcd_menu_print_select()
                             retract_length = material[e].retraction_length[nozzleSizeToTemperatureIndex(LCD_DETAIL_CACHE_NOZZLE_DIAMETER(e))];
                         }
 
-                        enquecommand_P(PSTR("G28"));
-                        enquecommand_P(PSTR(HEATUP_POSITION_COMMAND)); 
-                        
+
                         //AEther
-                        lcd_lib_clear();
-                        lcd_change_to_menu(quality_menu, 0);
+                        char buffer[64];
+                        card.fgets(buffer, sizeof(buffer));
+                        buffer[sizeof(buffer)-1] = '\0';
+                        while (strlen(buffer) > 0 && buffer[strlen(buffer)-1] < ' ') buffer[strlen(buffer)-1] = '\0';
+                        if (strcmp_P(buffer, PSTR(";Quality:Settings")) != 0)
+                        {
+                            card.fgets(buffer, sizeof(buffer));
+                            buffer[sizeof(buffer)-1] = '\0';
+                            while (strlen(buffer) > 0 && buffer[strlen(buffer)-1] < ' ') buffer[strlen(buffer)-1] = '\0';
+                        }
+                        if (strcmp_P(buffer, PSTR(";Quality:Settings")) == 0)
+                        {
+                            lcd_lib_clear();
+                            lcd_change_to_menu(lcd_menu_header_select, 0);
+                        }
+                        else
+                        {
+                            lcd_lib_clear();                            
+                            lcd_change_to_menu(lcd_menu_header_select, 0);
+                        }
+
 
                         if (strcasecmp(material[0].name, LCD_DETAIL_CACHE_MATERIAL_TYPE(0)) != 0)
                         {
@@ -595,6 +612,42 @@ static void lcd_menu_print_printing()
         switch(printing_state)
         {
         default:
+            switch(type_index)
+            {
+                case 1:
+                    lcd_lib_draw_string_center(00, "BRIM");
+                    break;
+                case 2:
+                    lcd_lib_draw_string_center(00, "FIRST LAYER");
+                    break;
+                case 3:
+                    lcd_lib_draw_string_center(00, "SUPPORT");
+                    break;
+                case 4:
+                    lcd_lib_draw_string_center(00, "INTERFACE ROOF");
+                    break;
+                case 5:
+                    lcd_lib_draw_string_center(00, "BOTTOM");
+                    break;
+                case 6:
+                    lcd_lib_draw_string_center(00, "OUTER WALL");
+                    break;
+                case 7:
+                    lcd_lib_draw_string_center(00, "INNER WALL");
+                    break;
+                case 8:
+                    lcd_lib_draw_string_center(00, "INFILL");
+                    break;
+                case 9:
+                    lcd_lib_draw_string_center(00, "TOP");
+                    break;
+                case 10:
+                    lcd_lib_draw_string_center(00, "INTERFACE FLOOR");
+                    break;
+                case 11:
+                    lcd_lib_draw_string_center(00, "TRAVEL");
+                    break;
+            }
             lcd_lib_draw_string_centerP(20, PSTR("Printing:"));
             lcd_lib_draw_string_center(30, LCD_CACHE_FILENAME(0));
             break;
@@ -613,6 +666,7 @@ static void lcd_menu_print_printing()
             lcd_lib_draw_string_center(30, buffer);
             break;
         }
+        /*
         float printTimeMs = (millis() - starttime);
         float printTimeSec = printTimeMs / 1000L;
         float totalTimeMs = float(printTimeMs) * float(card.getFileSize()) / float(card.getFilePos());
@@ -645,7 +699,7 @@ static void lcd_menu_print_printing()
             lcd_lib_draw_stringP(5, 10, PSTR("Time left"));
             lcd_lib_draw_string(65, 10, buffer);
         }
-
+        */
         lcd_progressbar(progress);
     }
 
@@ -787,7 +841,7 @@ static char* tune_item_callback(uint8_t nr)
     else if (nr == 2)
         strcpy_P(c, PSTR("Speed"));
     else if (nr == 3)
-        strcpy_P(c, PSTR("Feedrates"));
+        strcpy_P(c, PSTR("Type Settings"));
     else if (nr == 4)
         strcpy_P(c, PSTR("Temperature"));
 #if EXTRUDERS > 1

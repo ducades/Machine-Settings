@@ -14,6 +14,7 @@
 #include "UltiLCD2_hi_lib.h"
 #include "UltiLCD2_menu_print.h"
 
+
 void lcd_advanced_type();
 void lcd_advanced_type_tune();
 void brim_menu();
@@ -28,6 +29,9 @@ void top_menu();
 void interface_bot_menu();
 void travel_menu();
 void quality_menu();
+void lcd_menu_header_select();
+void set_header_true();
+void set_header_false();
 
 bool tune_type = false;
 
@@ -1338,13 +1342,11 @@ static void quality_menu()
         {
             if (tune_type == false)
             {
-                Config_StoreSettings();
                 lcd_lib_beep();
                 lcd_change_to_menu(previousMenu, 0);
             }
             else
             {
-                Config_StoreSettings();
                 lcd_lib_beep();
                 lcd_change_to_menu(lcd_advanced_type_tune, 0);
             }
@@ -1352,26 +1354,51 @@ static void quality_menu()
         else if (IS_SELECTED_SCROLL(1))
         {
             print_quality = PRINT_QUALITY_DRAFT;
-            Config_StoreSettings();
+            LED_QUALITY_DRAFT();
             lcd_lib_beep();
-            lcd_change_to_menu(lcd_menu_print_printing);
+            lcd_change_to_menu(lcd_menu_print_heatup);
         }
 
         else if (IS_SELECTED_SCROLL(2))
         {
             print_quality = PRINT_QUALITY_NORMAL;
-            Config_StoreSettings();
+            LED_QUALITY_NORMAL();
             lcd_lib_beep();
-            lcd_change_to_menu(lcd_menu_print_printing);
+            lcd_change_to_menu(lcd_menu_print_heatup);
         }
 
         else if (IS_SELECTED_SCROLL(3))        
         {
             print_quality = PRINT_QUALITY_BEST;
-            Config_StoreSettings();
+            LED_QUALITY_BEST();
             lcd_lib_beep();
-            lcd_change_to_menu(lcd_menu_print_printing);
+            lcd_change_to_menu(lcd_menu_print_heatup);
         }
     }
 
+}
+
+static void lcd_menu_header_select()
+{
+    LED_GLOW();
+    lcd_question_screen(quality_menu, set_header_true, PSTR("YES"), quality_menu, set_header_false, PSTR("NO"));
+
+    lcd_lib_draw_string_centerP(20, PSTR("Use header?"));
+
+    lcd_lib_update_screen();
+}
+
+static void set_header_true()
+{
+    header = true;                            
+    enquecommand_P(PSTR("G28"));
+    enquecommand_P(PSTR("G1 F3000 X5 Y10")); 
+}
+
+
+static void set_header_false()
+{
+    header = false;
+    enquecommand_P(PSTR("G28"));
+    enquecommand_P(PSTR("G1 F3000 X5 Y10")); 
 }

@@ -11,6 +11,11 @@ menuFunc_t postMenuCheck;
 int16_t previousEncoderPos;
 uint8_t led_glow = 0;
 uint8_t led_glow_dir;
+
+uint8_t led_pulse = 0;
+uint8_t led_pulse_dir;
+uint8_t pulseCounter = 0;
+
 uint8_t minProgress;
 
 const char* lcd_setting_name;

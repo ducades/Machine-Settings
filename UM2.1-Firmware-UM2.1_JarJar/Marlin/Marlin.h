@@ -252,6 +252,9 @@ extern bool axis_relative_modes[];
 extern int feedmultiply;
 
 //AEther
+extern bool header;
+extern int type_index;
+
 //FEEDS
 extern float brim_feed_d;
 extern float brim_feed_n;
