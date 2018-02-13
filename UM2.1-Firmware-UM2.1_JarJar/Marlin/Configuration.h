@@ -204,9 +204,9 @@
     //#define  DEFAULT_Kd 100.0
 
 // Ultimaker2 JarJar
-    #define  DEFAULT_Kp 10.03
-    #define  DEFAULT_Ki 1.50
-    #define  DEFAULT_Kd 70.0
+    #define  DEFAULT_Kp 10.283
+    #define  DEFAULT_Ki 0.78
+    #define  DEFAULT_Kd 33.903
 
 // Makergear
 //    #define  DEFAULT_Kp 7.0
